@@ -1,0 +1,48 @@
+/******************************************************************************
+
+                              Online C++ Compiler.
+               Code, Compile, Run and Debug C++ program online.
+Write your code in this editor and press "Run" button to compile and execute it.
+
+*******************************************************************************/
+
+#include <iostream>
+
+using namespace std;
+
+class Singleton{
+private:
+  int data;
+  static Singleton* instance;
+  Singleton()
+  {
+      data = 0;
+      cout << "Singleton: default constructor" << endl;
+  }
+  
+public:
+  Singleton(const Singleton& other) = delete;
+  Singleton& operator=(Singleton& other) = delete;
+  static Singleton* getInstance()
+  {
+    if(instance == NULL)
+      instance = new Singleton();
+    return instance;
+  }
+};
+
+Singleton *Singleton::instance = 0;
+
+int main()
+{
+    cout<<"Hello World";
+    Singleton *obj1;
+    obj1 = obj1->getInstance();
+    cout << obj1 << endl;
+    
+    Singleton *obj2;
+    obj2 = obj2->getInstance();
+    cout << obj2 << endl;
+
+    return 0;
+}
