@@ -1,0 +1,235 @@
+/******************************************************************************
+
+                              Online C++ Compiler.
+               Code, Compile, Run and Debug C++ program online.
+Write your code in this editor and press "Run" button to compile and execute it.
+
+*******************************************************************************/
+
+#include <iostream>
+
+using namespace std;
+class Person
+{
+private:
+    int age;
+    string pName;
+
+public:
+        Person(): pName(0),age(0)
+        {
+        }
+        Person(string pName, int age): pName(pName), age(age)
+        {
+        }
+        ~Person()
+        {
+        }
+
+        void Display()
+        {
+            //printf("Name = %s Age = %d \n", pName, age);
+            cout << "Name = " << pName << " Age = " << age << endl;
+        }
+        void Shout()
+        {
+            cout << "Ooooooooooooooooo" << endl;;
+        } 
+};
+class Counter
+{
+public:
+   Counter() : count(0)
+   {
+       cout << "Counter: constructor" << endl;
+   }
+   Counter(const Counter& other) = delete;
+   Counter& operator=(const Counter& other) = delete;
+   ~Counter()
+   {
+       cout << "Counter: destructor" << endl;
+   }
+   void operator++()
+   {
+       count++;
+   }
+   void operator++(int)
+   {
+       count++;
+   }
+   void operator--()
+   {
+       count--;
+   }
+   void operator--(int)
+   {
+       count--;
+   }
+   int getCounter()
+   {
+       return count;
+   }
+   
+   friend ostream& operator<<(ostream& os, const Counter& other)
+   {
+       os << "count value = " << other.count << endl;
+       return os;
+   }
+private:
+  int count;
+};
+
+template <typename T> class SharedPtr
+{
+public:
+   //default constructor
+   SharedPtr() : m_obj(0), m_counterPtr(0)
+   {
+       if(m_counterPtr == NULL)
+         m_counterPtr = new Counter();
+         
+       (*m_counterPtr)++;
+   }
+   //customerized constructor
+   SharedPtr(T* obj) : m_obj(obj), m_counterPtr(0)
+   {
+       m_counterPtr = new Counter();
+         
+       if(m_counterPtr)
+         (*m_counterPtr)++;
+         
+       cout << "SharedPtr: constructor" << endl;
+   }
+   //copy constructor
+   SharedPtr(const SharedPtr<T>& other) : m_obj(other.m_obj), m_counterPtr(other.m_counterPtr)
+   {
+       //this->m_obj = other->m_obj;
+       //this->m_counterPtr = other->m_counterPtr;
+       (*m_counterPtr)++;
+       
+       cout << "SharedPtr: copy constructor" << endl;
+   }
+   //assignment operator
+   SharedPtr& operator=(const SharedPtr<T>& other)
+   {
+       cout << "SharedPtr: assignment operator" << endl;
+       //avoid self assignment
+       if(this == &other) return *this;
+       (*m_counterPtr)--;
+       if(m_counterPtr->getCounter() == 0)
+       {
+           cout << "SharedPtr: delete" << endl;
+           delete m_obj;
+           delete m_counterPtr;
+       }
+       m_obj = other.m_obj;
+       m_counterPtr = other.m_counterPtr;
+       (*m_counterPtr)++;
+       
+       
+       
+       return *this;
+   }
+   //destructor
+   ~SharedPtr()
+   {
+       cout << "SharedPtr: destructor" << endl;
+       (*m_counterPtr)--;
+       if(m_counterPtr->getCounter() == 0)
+       {
+           cout << "SharedPtr: delete" << endl;
+           delete m_obj;
+           delete m_counterPtr;
+       }
+   }
+   
+   //reference to T pointer
+   T* operator->()
+   {
+       return m_obj;
+   }
+   
+   T& operator*()
+   {
+       return *m_obj;
+   }
+   
+   friend ostream& operator<<(ostream& os, const SharedPtr<T>& other)
+   {
+       os << "Address pointed : " << other.m_obj << endl;
+       os << (*other.m_counterPtr) << endl;
+       return os;
+   }
+   
+private:
+   T* m_obj;
+   Counter* m_counterPtr;
+};
+
+int main()
+{
+#if TESTCASE_1
+    SharedPtr<Person> p(new Person("Scott", 25));
+    p->Display();
+    {
+        SharedPtr<Person> q = p;
+        q->Display();
+        // Destructor of q will be called here..
+
+        SharedPtr<Person> r;
+        r = p;
+        r->Display();
+        // Destructor of r will be called here..
+    }
+    p->Display();
+    cout<<"Hello World";
+#else
+ // ptr1 pointing to an integer.
+    SharedPtr<int> ptr1(new int(151));
+    cout << "--- Shared pointers ptr1 ---\n";
+    *ptr1 = 100;
+    cout << " ptr1's value now: " << *ptr1 << endl;
+    cout << ptr1;
+ 
+    {
+        // ptr2 pointing to same integer
+        // which ptr1 is pointing to
+        // Shared pointer reference counter
+        // should have increased now to 2.
+        SharedPtr<int> ptr2 = ptr1;
+        cout << "--- Shared pointers ptr1, ptr2 ---\n";
+        cout << ptr1;
+        cout << ptr2;
+ 
+        {
+            // ptr3 pointing to same integer
+            // which ptr1 and ptr2 are pointing to.
+            // Shared pointer reference counter
+            // should have increased now to 3.
+            SharedPtr<int> ptr3(ptr2);
+            cout << "--- Shared pointers ptr1, ptr2, ptr3 "
+                    "---\n";
+            cout << ptr1;
+            cout << ptr2;
+            cout << ptr3;
+        }
+ 
+        // ptr3 is out of scope.
+        // It would have been destructed.
+        // So shared pointer reference counter
+        // should have decreased now to 2.
+        cout << "--- Shared pointers ptr1, ptr2 ---\n";
+        cout << ptr1;
+        cout << ptr2;
+    }
+ 
+    // ptr2 is out of scope.
+    // It would have been destructed.
+    // So shared pointer reference counter
+    // should have decreased now to 1.
+    cout << "--- Shared pointers ptr1 ---\n";
+    cout << ptr1;
+#endif
+
+    return 0;
+}
